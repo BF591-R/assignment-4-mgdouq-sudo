@@ -7,6 +7,10 @@ output: html_document
 source('main.R')
 ```
 
+```{r}
+testthat::test_file('test_main.R')
+```
+
 ## Setup
 Feel free to refer to the reference_report.html provided in the assignment repo.
 This will let you see a preview of the output the report is intended to
@@ -120,9 +124,9 @@ figures. Until you've completed all the parts, you may safely leave these
 captions blank.
 
 ```{r code block to create descriptive captions}
-caption_4 <- 'Descriptive Caption for part 4 here'
-caption_5 <- 'Descriptive Caption for part 5 here'
-caption_8 <- 'Descriptive Caption for part 8 here'
+caption_4 <- 'Figure 1: Proportion of variance explained by each principal component (bar) and cumulative variance explained (line) across all 35 PCs derived from gene expression data of 35 samples.'
+caption_5 <- 'Figure 2: Biplot of PC1 vs PC2 scores for 35 samples colored by SixSubTypesClassification, illustrating the separation of breast cancer subtypes captured by the top two principal components which together explain 24.1% of total variance.'
+caption_8 <- 'Figure 3: Heatmap of normalized intensity values for differentially expressed probes (FDR < 0.01) across all samples, where rows represent significant probes and columns represent samples.'
 ```
 
 ## 4. Plot the variance explained and cumulative variance for the PCs
@@ -141,7 +145,19 @@ numeric ordering.
 
 ```{r code block to plot variance explained and cumulative variance explained, fig.cap = caption_4}
 #Create a ggplot2 with the plot described above, refer to the reference report
-
+variance_tibble$principal_components <- factor(variance_tibble$principal_components, levels = variance_tibble$principal_components)
+ls_cols <- c('Cumulative'='black')
+bar_cols <-c('Variance Explained'='light blue')
+  variance_tibble %>%
+    ggplot() + 
+    geom_bar(aes(x=principal_components, y=variance_explained, fill='Variance Explained'), stat='identity', color='black') + 
+    geom_line(aes(x=principal_components, y=cumulative, group=1, color='Cumulative')) +
+    geom_point(aes(x=principal_components, y=cumulative, group=1, color='Cumulative')) +
+    scale_colour_manual(name="Cumulative",values=ls_cols) +
+    scale_fill_manual(name="Variance Explained",values=bar_cols) +
+    labs(x='PC', y='% variance') +
+    theme_classic(base_size=8) + 
+    theme(axis.text.x=element_text(angle=90,hjust=1))
 ```
 
 
@@ -216,6 +232,7 @@ significant probes.__
 de_intensity <- return_de_intensity(intensity, sig_ids)
 head(de_intensity, 2)
 ```
+
 
 ## 8. Generate a heatmap of normalized intensity values (color-blind friendly)
 __Write a function, `heatmap_plot`, that uses the `de_intensity` results and
